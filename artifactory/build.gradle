@@ -1,6 +1,7 @@
 apply plugin: 'java'
 apply plugin: 'eclipse'
 apply plugin: 'application'
+apply plugin: 'maven-publish'
 
 mainClassName = 'hello.HelloWorld'
 
@@ -12,8 +13,8 @@ repositories {
 
 // tag::jar[]
 jar {
-    archiveBaseName = 'gs-gradle'
-    archiveVersion =  '0.1.0'
+    baseName = 'gs-gradle'
+    version =  '0.1.0'
 }
 // end::jar[]
 
@@ -22,10 +23,59 @@ sourceCompatibility = 1.8
 targetCompatibility = 1.8
 
 dependencies {
-    implementation "joda-time:joda-time:2.2"
-    testImplementation "junit:junit:4.12"
+    compile "joda-time:joda-time:2.2"
+    testCompile "junit:junit:4.12"
 }
 // end::dependencies[]
 
 // tag::wrapper[]
 // end::wrapper[]
+
+// publication
+publishing {
+    publications {
+        jar(MavenPublication) {
+            groupId 'cursojenkinsmac'
+            artifactId 'gs-gradle'
+            version '1.0'
+            from components.java
+        }
+    }
+}
+
+// artifactory configuration
+buildscript {
+    repositories {
+        jcenter()
+
+    }
+    dependencies {
+        //Check for the latest version here: http://plugins.gradle.org/plugin/com.jfrog.artifactory
+        classpath "org.jfrog.buildinfo:build-info-extractor-gradle:4+"
+    }
+}
+
+allprojects {
+    apply plugin: "com.jfrog.artifactory"
+}
+
+artifactory {
+    publish {
+        repository {
+            repoKey = 'gradle-dev-local'
+            maven = true
+        }
+        defaults {
+            publications('jar')
+            publishArtifacts = true
+            publishPom = true
+        }
+    }
+    resolve {
+        repository {
+            repoKey = 'gradle-dev'
+            maven = true
+
+        }
+    }
+}
