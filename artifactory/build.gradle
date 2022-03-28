@@ -69,7 +69,6 @@ artifactory {
             publications('jar')
             publishArtifacts = true
             publishPom = true
-            publishBuildInfo = false
         }
     }
     resolve {
